@@ -54,8 +54,8 @@ Frontend: Static index.html (fetch API), TailwindCSS via CDN
    
         
          GET /api/tasks?sortBy=<dateAdded|createdAt|dueDate|priority>&order=<asc|desc>
-        
 
+   Example
         
          curl "http://127.0.0.1:5000/api/tasks?sortBy=createdAt&order=desc"
       
@@ -64,7 +64,7 @@ Frontend: Static index.html (fetch API), TailwindCSS via CDN
 
     
    
-         [
+         
         {
           "id": 1,
           "title": "Buy milk",
@@ -114,6 +114,9 @@ Example
 ## Notes on Validation
 
 > title is required and must be non-empty.
+
 > priority must be one of High, Mid, Low.
+
 > status must be ongoing or completed.
+
 > isDone is stored as integer (0/1) in DB, returned as boolean in JSON.
