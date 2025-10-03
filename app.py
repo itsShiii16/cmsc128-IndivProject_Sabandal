@@ -21,7 +21,7 @@ app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 @app.route('/')
-def home():
+def home():                                           # returns index html
     return render_template('index.html')
 
 def get_conn() -> sqlite3.Connection:
