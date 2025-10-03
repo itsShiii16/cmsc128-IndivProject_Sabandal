@@ -12,11 +12,12 @@ ALLOWED_PRIORITIES = {"High", "Mid", "Low"}          # whitelist for priority va
 # Sorting: map API query values to actual DB column names
 SORT_COLUMNS = {
     "dateAdded": "created_at",
+    "createdAt": "created_at",   
     "dueDate": "due_date",
     "priority": "priority",
 }
 
-app = Flask(__name__)
+app = Flask(__name__)   
 CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 @app.route('/')
