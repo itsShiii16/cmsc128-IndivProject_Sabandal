@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>To-Do List</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+</head>
+
+<body class="bg-gray-100 min-h-screen flex">
+
+  <div class="flex min-h-screen w-full">
+
+    <div class="w-1/4 bg-indigo-600 text-white shadow-lg p-6">
+      <h2 class="text-2xl font-semibold mb-6">Sidebar</h2>
+      <ul>
+        <li class="mb-4"><a href="#" class="text-lg hover:text-indigo-300">Link 1</a></li>
+        <li class="mb-4"><a href="#" class="text-lg hover:text-indigo-300">Link 2</a></li>
+        <li class="mb-4"><a href="#" class="text-lg hover:text-indigo-300">Link 3</a></li>
+      </ul>
+    </div>
+
+    <div class="flex flex-col w-full p-6">
+
+      <div class="mb-6 bg-white shadow-lg rounded-lg p-6 flex items-center justify-between">
+        <div class="flex items-center gap-4">
+          <img src="https://via.placeholder.com/50" alt="Logo" class="w-12 h-12 rounded-full">
+          <h1 class="text-4xl font-bold text-center text-indigo-600 mb-6">To-Do List</h1>
+        </div>
+        
+        <div class="flex items-center gap-4">
+          <select id="sortBy" class="p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" onchange="refreshTasks()">
+            <option value="dateAdded">Sort by Date Added</option>
+            <option value="priority">Sort by Priority</option>
+            <option value="createdAt">Sort by Created Date</option>
+          </select>
+          
+          <select id="order" class="p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" onchange="refreshTasks()">
+            <option value="asc">Ascending</option>
+            <option value="desc">Descending</option>
+          </select>
+          
+         
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        <div class="bg-white shadow-lg rounded-lg p-6 mb-6">
+          <h2 class="text-2xl font-semibold text-gray-700 mb-4">Ongoing Tasks</h2>
+          <div id="ongoing-tasks" class="space-y-4">
+            </div>
+        </div>
+
+        <div class="bg-white shadow-lg rounded-lg p-6 mb-6">
+          <h2 class="text-2xl font-semibold text-gray-700 mb-4">Completed Tasks</h2>
+          <div id="completed-tasks" class="space-y-4">
+            </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <button id="addTaskBtn" class="fixed bottom-6 right-6 bg-indigo-600 text-white p-4 rounded-full shadow-lg hover:bg-indigo-500 transition-all" onclick="toggleTaskForm()">
+    <i class="fas fa-plus"></i>
+  </button>
+
+  <div id="taskForm" class="fixed inset-0 flex justify-center items-center bg-gray-500 bg-opacity-50 hidden">
+    <div class="bg-white p-6 rounded-lg w-1/3">
+      <h2 class="text-2xl font-semibold text-gray-700 mb-4">Add New Task</h2>
+      <form id="new-task-form" class="space-y-6">
+        <div>
+          <input type="text" id="title" class="input w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Task Title" required />
+        </div>
+
+        <div>
+          <textarea id="description" class="textarea w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Task Description"></textarea>
+        </div>
+
+        <div>
+          <select id="priority" class="select w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <option value="High">High</option>
+            <option value="Mid">Mid</option>
+            <option value="Low">Low</option>
+          </select>
+        </div>
+
+        <div class="flex justify-between space-x-4">
+          <input type="date" id="dueDate" class="input w-1/2 p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+          <input type="time" id="dueTime" class="input w-1/2 p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+        </div>
+
+        <div class="mt-4 text-center">
+          <button type="submit" class="bg-indigo-600 text-white p-3 rounded-md w-full hover:bg-indigo-500 transition-all">Add Task</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="updateTaskModal" class="fixed inset-0 flex justify-center items-center bg-gray-500 bg-opacity-50 hidden" onclick="closeUpdateTaskModal(event)">
+    <div class="bg-white p-6 rounded-lg w-1/3" onclick="event.stopPropagation()">
+      <h2 class="text-2xl font-semibold text-gray-700 mb-4">Update Task</h2>
+      <form id="update-task-form" class="space-y-6">
+        <div>
+          <input type="text" id="update-title" class="input w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Task Title" required />
+        </div>
+        <div>
+          <textarea id="update-description" class="textarea w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Task Description"></textarea>
+        </div>
+        <div>
+          <select id="update-priority" class="select w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <option value="High">High</option>
+            <option value="Mid">Mid</option>
+            <option value="Low">Low</option>
+          </select>
+        </div>
+        <div class="flex justify-between space-x-4">
+          <input type="date" id="update-dueDate" class="input w-1/2 p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+          <input type="time" id="update-dueTime" class="input w-1/2 p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+        </div>
+        <div class="mt-4 text-center">
+          <button type="submit" class="bg-indigo-600 text-white p-3 rounded-md w-full hover:bg-indigo-500 transition-all">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const ongoingTasks = document.getElementById('ongoing-tasks');
+    const completedTasks = document.getElementById('completed-tasks');
+    const newTaskForm = document.getElementById('new-task-form');
+    const taskForm = document.getElementById('taskForm');
+    const updateTaskModal = document.getElementById('updateTaskModal');
+    const updateTaskForm = document.getElementById('update-task-form');
+    // Using a more robust base URL construction and removing the template literal in string to prevent issues
+    const API_BASE = 'http://127.0.0.1:5000/api/tasks'; 
+    let currentTaskId = null;
+
+    // Fetch and display tasks
+    function fetchTasks(sortBy = "dateAdded", order = "asc") {
+      // Get values from sorting selects
+      const currentSortBy = document.getElementById('sortBy').value;
+      const currentOrder = document.getElementById('order').value;
+      
+      fetch(`${API_BASE}?sortBy=${currentSortBy}&order=${currentOrder}`) // Use current select values
+        .then(response => response.json())
+        .then(data => {
+          ongoingTasks.innerHTML = '';  // Clear current ongoing tasks
+          completedTasks.innerHTML = ''; // Clear current completed tasks
+          data.forEach(task => {
+            const taskItem = document.createElement('div');
+            taskItem.classList.add('p-4', 'mb-4', 'border', 'border-gray-200', 'rounded-lg', 'shadow-md');
+            
+            // Added conditional styling based on isDone state for better visual distinction
+            if (task.isDone) {
+              taskItem.classList.add('opacity-70', 'bg-green-50');
+            } else {
+              taskItem.classList.add('bg-white');
+            }
+            
+            // Refactored to use a more robust `toggleTaskCompletion(this, ${task.id})`
+            taskItem.innerHTML = `
+              <h3 class="text-lg font-semibold">${task.title}</h3>
+              <p class="text-gray-600">${task.description || 'No description'}</p>
+              <p class="text-sm text-gray-500">Priority: <span class="font-semibold">${task.priority}</span></p>
+              <p class="text-sm text-gray-500">Due: ${task.dueDate} ${task.dueTime ? 'at ' + task.dueTime : ''}</p>
+              <div class="mt-2 flex gap-2 items-center">
+                <button class="bg-green-500 text-white p-2 rounded-md hover:bg-green-600" onclick="openUpdateTaskModal(${task.id})">Update</button>
+                <button class="bg-red-500 text-white p-2 rounded-md hover:bg-red-600" onclick="deleteTask(${task.id})">Delete</button>
+                <label class="flex items-center space-x-2 cursor-pointer">
+                  <input type="checkbox" onchange="toggleTaskCompletion(this, ${task.id})" ${task.isDone ? 'checked' : ''} class="w-4 h-4 text-indigo-600 bg-gray-100 border-gray-300 rounded focus:ring-indigo-500">
+                  <span>${task.isDone ? 'Mark as Ongoing' : 'Mark as Completed'}</span>
+                </label>
+              </div>
+            `;
+            
+            if (task.isDone) {
+              completedTasks.appendChild(taskItem);
+            } else {
+              ongoingTasks.appendChild(taskItem);
+            }
+          });
+        })
+        .catch(error => console.error('Error fetching tasks:', error));
+    }
+
+    // Handle task creation
+    newTaskForm.addEventListener('submit', function (event) {
+      event.preventDefault();
+
+      const title = document.getElementById('title').value;
+      const description = document.getElementById('description').value;
+      const priority = document.getElementById('priority').value;
+      const dueDate = document.getElementById('dueDate').value;
+      const dueTime = document.getElementById('dueTime').value;
+
+      const newTask = {
+        title,
+        description,
+        priority,
+        dueDate,
+        dueTime
+      };
+
+      fetch(API_BASE, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newTask),
+      })
+        .then(response => {
+          if (!response.ok) throw new Error('Task creation failed.');
+          return response.json();
+        })
+        .then(() => {
+          fetchTasks();
+          newTaskForm.reset();
+          taskForm.classList.add('hidden');
+        })
+        .catch(error => alert('Error creating task: ' + error.message));
+    });
+
+    // Handle task deletion
+    function deleteTask(taskId) {
+      if (!confirm("Are you sure you want to delete this task?")) return;
+      
+      fetch(`${API_BASE}/${taskId}`, {
+        method: 'DELETE',
+      })
+        .then(response => {
+           if (!response.ok && response.status !== 204) throw new Error('Task deletion failed.'); // 204 No Content is common for successful delete
+           fetchTasks();
+        })
+        .catch(error => alert('Error deleting task: ' + error.message));
+    }
+
+    // Handle task update modal open
+    function openUpdateTaskModal(taskId) {
+      currentTaskId = taskId;
+      // Fetch task data and populate the form
+      fetch(`${API_BASE}/${taskId}`)
+        .then(response => {
+            if (!response.ok) throw new Error('Task not found.');
+            return response.json();
+        })
+        .then(task => {
+          document.getElementById('update-title').value = task.title;
+          document.getElementById('update-description').value = task.description;
+          document.getElementById('update-priority').value = task.priority;
+          document.getElementById('update-dueDate').value = task.dueDate;
+          document.getElementById('update-dueTime').value = task.dueTime;
+          updateTaskModal.classList.remove('hidden');
+        })
+        .catch(error => alert('Error fetching task for update: ' + error.message));
+    }
+    
+    // Helper function to close modal by clicking outside
+    function closeUpdateTaskModal(event) {
+        if (event.target === updateTaskModal) {
+            updateTaskModal.classList.add('hidden');
+        }
+    }
+
+
+    // Handle task update
+    updateTaskForm.addEventListener('submit', function (event) {
+      event.preventDefault();
+
+      const title = document.getElementById('update-title').value;
+      const description = document.getElementById('update-description').value;
+      const priority = document.getElementById('update-priority').value;
+      const dueDate = document.getElementById('update-dueDate').value;
+      const dueTime = document.getElementById('update-dueTime').value;
+
+      const updatedTask = {
+        title,
+        description,
+        priority,
+        dueDate,
+        dueTime
+      };
+
+      fetch(`${API_BASE}/${currentTaskId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedTask),
+      })
+        .then(response => {
+            if (!response.ok) throw new Error('Task update failed.');
+            return response.json();
+        })
+        .then(() => {
+          fetchTasks();
+          updateTaskModal.classList.add('hidden');
+        })
+        .catch(error => alert('Error updating task: ' + error.message));
+    });
+
+    // **FIXED:** Handle toggling task completion status
+    function toggleTaskCompletion(checkboxElement, taskId) {
+      const isDone = checkboxElement.checked; // Get the new state from the checkbox
+
+      fetch(`${API_BASE}/${taskId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ isDone: isDone }), // Send the new state
+      })
+        .then(response => {
+            if (!response.ok) throw new Error('Completion status update failed.');
+            return response.json();
+        })
+        .then(() => {
+          fetchTasks(); // Refresh the task list to move the item
+        })
+        .catch(error => {
+            alert('Error updating task completion: ' + error.message);
+            checkboxElement.checked = !isDone; // Revert checkbox state on error
+        });
+    }
+
+    // Refresh button and sort/order select change handler
+    function refreshTasks() {
+      // fetchTasks will read the current values from the select boxes
+      fetchTasks(); 
+    }
+
+    // Toggle task form visibility
+    function toggleTaskForm() {
+      taskForm.classList.toggle('hidden');
+    }
+
+    // Initial fetch when the page loads
+    fetchTasks();
+  </script>
+
+</body>
+
+</html>
